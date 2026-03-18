@@ -3,7 +3,10 @@ import json
 import traceback
 from datetime import datetime, timezone
 
+from pathlib import Path
+
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from openai import OpenAI
 
@@ -83,3 +86,8 @@ def analyse(req: AnalyseRequest):
 @app.get("/api/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/")
+def root():
+    return FileResponse(Path(__file__).resolve().parent.parent / "public" / "index.html")
