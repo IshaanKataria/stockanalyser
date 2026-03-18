@@ -1,0 +1,58 @@
+import json
+from openai import AsyncOpenAI
+from datetime import datetime, timezone
+
+
+SYSTEM_PROMPT = """You are a senior financial analyst. Analyse the provided text and return a structured JSON response.
+
+Your response MUST be valid JSON with exactly these fields:
+{
+  "summary": "2-3 sentence executive summary of the text",
+  "sentiment": {
+    "score": <float from -1.0 (very bearish) to 1.0 (very bullish)>,
+    "label": "<Strongly Bearish | Bearish | Slightly Bearish | Neutral | Slightly Bullish | Bullish | Strongly Bullish>"
+  },
+  "insights": ["key insight 1", "key insight 2", ...],
+  "risks": ["risk factor 1", "risk factor 2", ...],
+  "catalysts": ["potential catalyst 1", "potential catalyst 2", ...],
+  "action": "suggested action or consideration (NOT financial advice, frame as informational)",
+  "confidence": <float from 0.0 to 1.0 indicating how confident you are in this analysis>
+}
+
+Guidelines:
+- Be specific and actionable in insights
+- Identify both explicit and implicit risks
+- Look for forward-looking statements and catalysts
+- Score sentiment based on the overall tone and implications
+- If the text is not financial in nature, still analyse it for sentiment and key takeaways
+- Keep insights concise but substantive (1-2 sentences each)
+- Aim for 3-6 insights, 2-4 risks, and 2-4 catalysts
+- Return ONLY the JSON object, no markdown formatting"""
+
+ANALYSIS_TYPE_PROMPTS = {
+    "general": "Analyse this text for investment-relevant insights:",
+    "earnings": "This is an earnings call transcript or report. Focus on revenue, margins, guidance, and management commentary:",
+    "news": "This is a news article. Focus on market impact, affected sectors, and potential price catalysts:",
+}
+
+
+async def analyse_text(client: AsyncOpenAI, text: str, analysis_type: str = "general") -> dict:
+    type_prompt = ANALYSIS_TYPE_PROMPTS.get(analysis_type, ANALYSIS_TYPE_PROMPTS["general"])
+    word_count = len(text.split())
+
+    response = await client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": f"{type_prompt}\n\n{text}"},
+        ],
+        temperature=0.3,
+        response_format={"type": "json_object"},
+    )
+
+    result = json.loads(response.choices[0].message.content)
+    result["word_count"] = word_count
+    result["timestamp"] = datetime.now(timezone.utc).isoformat()
+    result["analysis_type"] = analysis_type
+
+    return result

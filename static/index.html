@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StockAnalyser</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Stock<span>Analyser</span></h1>
+      <p>AI-powered financial text analysis</p>
+    </header>
+
+    <div class="input-section">
+      <div class="input-header">
+        <label for="text-input">Paste your text</label>
+        <select id="analysis-type" class="type-select">
+          <option value="general">General Analysis</option>
+          <option value="earnings">Earnings Report</option>
+          <option value="news">News Article</option>
+        </select>
+      </div>
+      <textarea id="text-input" placeholder="Paste a financial report, earnings call transcript, news article, or any text you want analysed..."></textarea>
+      <div class="word-count" id="word-count">0 words</div>
+      <div class="actions">
+        <button class="btn btn-primary" id="analyse-btn">Analyse</button>
+        <button class="btn btn-secondary" id="clear-btn">Clear</button>
+      </div>
+    </div>
+
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Analysing text...</p>
+    </div>
+
+    <div class="results">
+      <div style="display: flex; justify-content: flex-end; margin-bottom: 0.75rem;">
+        <button class="btn btn-secondary" id="copy-btn" onclick="copyResults()" style="font-size: 0.8rem; padding: 0.3rem 0.75rem;">Copy Results</button>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="label">Sentiment</div>
+          <div class="gauge-container">
+            <div class="gauge-bg"></div>
+            <div class="gauge-mask"></div>
+            <div class="gauge-needle"></div>
+          </div>
+          <div class="value" id="sentiment-score">0.00</div>
+          <div class="sub" id="sentiment-label">Neutral</div>
+        </div>
+        <div class="metric-card">
+          <div class="label">Words Analysed</div>
+          <div class="value" id="metric-words">0</div>
+          <div class="sub">input length</div>
+        </div>
+        <div class="metric-card">
+          <div class="label">Confidence</div>
+          <div class="value" id="metric-confidence">0%</div>
+          <div class="sub" id="metric-type">General</div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <h3>Executive Summary</h3>
+        <p id="summary-text"></p>
+      </div>
+
+      <div class="section-card">
+        <h3>Key Insights</h3>
+        <ul id="insights-list" class="insights-list"></ul>
+      </div>
+
+      <div class="section-card">
+        <h3>Risk Factors</h3>
+        <ul id="risks-list" class="risks-list"></ul>
+      </div>
+
+      <div class="section-card">
+        <h3>Potential Catalysts</h3>
+        <ul id="catalysts-list" class="catalysts-list"></ul>
+      </div>
+
+      <div class="section-card action-box">
+        <h3>Suggested Consideration</h3>
+        <p id="action-text"></p>
+        <p class="disclaimer">This is not financial advice. Always do your own research.</p>
+      </div>
+    </div>
+
+    <div class="history-section">
+      <div class="history-header">
+        <h2>History</h2>
+        <div>
+          <button class="btn btn-secondary" onclick="exportHistory()" style="font-size: 0.8rem; padding: 0.3rem 0.75rem;">Export</button>
+          <button class="btn btn-secondary" onclick="clearHistory()" style="font-size: 0.8rem; padding: 0.3rem 0.75rem;">Clear</button>
+        </div>
+      </div>
+      <div id="history-list" class="history-list"></div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
