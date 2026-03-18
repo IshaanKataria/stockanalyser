@@ -83,3 +83,15 @@ def analyse(req: AnalyseRequest):
 @app.get("/api/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/api/debug")
+def debug():
+    import httpx
+    key = os.environ.get("OPENAI_API_KEY", "NOT SET")
+    key_preview = key[:10] + "..." if len(key) > 10 else key
+    try:
+        r = httpx.get("https://api.openai.com/v1/models", headers={"Authorization": f"Bearer {key}"}, timeout=10)
+        return {"key_preview": key_preview, "openai_status": r.status_code, "openai_ok": r.status_code == 200}
+    except Exception as e:
+        return {"key_preview": key_preview, "error": str(e), "error_type": type(e).__name__}
