@@ -1,11 +1,11 @@
 import os
 import json
+import traceback
 from datetime import datetime, timezone
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from openai import AsyncOpenAI
+from openai import OpenAI
 
 app = FastAPI()
 
@@ -42,17 +42,13 @@ ANALYSIS_TYPE_PROMPTS = {
 }
 
 
-def get_client():
-    return AsyncOpenAI(api_key=os.environ["OPENAI_API_KEY"])
-
-
 class AnalyseRequest(BaseModel):
     text: str
     analysis_type: str = "general"
 
 
 @app.post("/api/analyse")
-async def analyse(req: AnalyseRequest):
+def analyse(req: AnalyseRequest):
     if not req.text.strip():
         raise HTTPException(400, "Text cannot be empty")
     if len(req.text) > 100_000:
@@ -64,8 +60,8 @@ async def analyse(req: AnalyseRequest):
     word_count = len(req.text.split())
 
     try:
-        client = get_client()
-        response = await client.chat.completions.create(
+        client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+        response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
@@ -80,9 +76,10 @@ async def analyse(req: AnalyseRequest):
         result["analysis_type"] = req.analysis_type
         return result
     except Exception as e:
+        print(f"Error: {traceback.format_exc()}")
         raise HTTPException(500, f"Analysis failed: {e}")
 
 
 @app.get("/api/health")
-async def health():
+def health():
     return {"status": "ok"}
