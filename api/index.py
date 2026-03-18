@@ -3,10 +3,8 @@ import json
 import traceback
 from datetime import datetime, timezone
 
-from pathlib import Path
-
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from openai import OpenAI
 
@@ -90,4 +88,4 @@ def health():
 
 @app.get("/")
 def root():
-    return FileResponse(Path(__file__).resolve().parent.parent / "public" / "index.html")
+    return RedirectResponse("/index.html")
